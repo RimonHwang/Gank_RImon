@@ -1,4 +1,2 @@
-# TabLayout
-##TabLayout结合ViewPager和Fragment使用来实现带tab的多页面滑动切换效果，例子（demo）如下：
-学习该例子前，你应掌握的知识点：1.Fragment，2.ViewPager， 3.ButterKnife （View注入框架）的使用
-![TabLayout](http://img.blog.csdn.net/20160524213536433)
+# Gank_RImon
+基于干活集中营（http://gank.io/api）提供的api编写的程序，使用了Rxjava，Retrofit和Glide第三方开源库，感谢以上。项目更新中
