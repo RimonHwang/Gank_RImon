@@ -24,8 +24,8 @@ public class PageAdapter extends FragmentStatePagerAdapter {
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                PrettyGirlFragment fragment1 = new PrettyGirlFragment();
-                return fragment1;
+                PrettyGirlFragment prettyGirlFragment = new PrettyGirlFragment();
+                return prettyGirlFragment;
             case 1:
                 Fragment2 fragment2 = new Fragment2();
                 return fragment2;

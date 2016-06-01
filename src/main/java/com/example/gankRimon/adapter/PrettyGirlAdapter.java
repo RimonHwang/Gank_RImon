@@ -76,8 +76,7 @@ public class PrettyGirlAdapter extends RecyclerView.Adapter<PrettyGirlViewHolder
     @Override
     public int getItemCount() {
 
-        String size=resultList.size()+"";
-        Log.e("妹子数量",size);
+        Log.e("妹子数量",String.valueOf(resultList.size()));
         return resultList.size();
     }
 
@@ -89,5 +88,8 @@ public class PrettyGirlAdapter extends RecyclerView.Adapter<PrettyGirlViewHolder
         void onLongClick(View v);
     }
 
+    public List<Gank.Result> getResultList(){
+        return resultList;
+    }
 
 }

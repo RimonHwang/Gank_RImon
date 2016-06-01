@@ -5,11 +5,12 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -39,16 +40,20 @@ public class PrettyGirlFragment extends Fragment {
     ImageView imageView;
     @BindView(R.id.prettyGirlView)
     RecyclerView prettyGirlView;
+    @BindView(R.id.prettyGirlRefresh)
+    SwipeRefreshLayout prettyGirlRefresh;
 
-//    private String url="http://ww4.sinaimg.cn/large/610dc034jw1f41lxgc3x3j20jh0tcn14.jpg";
     PrettyGirlAdapter prettyGirlAdapter;
+
+
     private Gank.Result result;
     private List<Gank.Result> resultList;
+    private List<Gank.Result> saveResult;
+    int COUNT=20;
+    public int DEFAULT_PAGE=1;
+    public int page=DEFAULT_PAGE;
 
-//    @Override
-//    public void onCreate(@Nullable Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//    }
+
 
 
     @Nullable
@@ -58,62 +63,94 @@ public class PrettyGirlFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_prettygirl, container, false);
         ButterKnife.bind(this, view);
 
+        prettyGirlRefresh.setColorSchemeColors(R.color.red);
+        getDatas("福利", COUNT, DEFAULT_PAGE);
 
-        getDatas("福利",50,1);
-
-        Log.e("444", Thread.currentThread().getName()+"Log");
+        Log.e("444", Thread.currentThread().getName() + "Log");
 
 
         prettyGirlAdapter = new PrettyGirlAdapter(getActivity(), new PrettyGirlAdapter.OnItemClickListener() {
             @Override
             public void onClick(View v, int position) {
-                Intent intent=new Intent(getActivity(),PrettyGirlShow.class);
-                intent.putExtra("url",resultList.get(position).getUrl());
+                Intent intent = new Intent(getActivity(), PrettyGirlShow.class);
+                intent.putExtra("url", prettyGirlAdapter.getResultList().get(position).getUrl());
                 startActivity(intent);
             }
         });
         prettyGirlView.setAdapter(prettyGirlAdapter);
-        prettyGirlView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
-        prettyGirlView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+        final StaggeredGridLayoutManager staggeredGridLayoutManager=new StaggeredGridLayoutManager(2,
+                StaggeredGridLayoutManager.VERTICAL);
+        prettyGirlView.setLayoutManager(staggeredGridLayoutManager);
+
+        prettyGirlRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
-            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-                return false;
+            public void onRefresh() {
+//                Log.e("清空前",String.valueOf(resultList.isEmpty()));
+//                resultList.clear();
+                //Log.e("清空后",String.valueOf(resultList.isEmpty()));
+                page=DEFAULT_PAGE;
+                getDatas("福利",COUNT, DEFAULT_PAGE);
             }
-
+        });
+        prettyGirlView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
 
-            }
-
-            @Override
-            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-
+                CardView cardView= (CardView) getActivity().findViewById(R.id.cardView);
+                RecyclerView.LayoutParams layoutParams= (RecyclerView.LayoutParams) cardView.getLayoutParams();
+                View lastView=recyclerView.getChildAt(recyclerView.getChildCount()-1);
+                int last=recyclerView.getChildAdapterPosition(lastView);
+                if ((last==prettyGirlAdapter.getItemCount()-1) && dy>0 && (lastView.getBottom()==prettyGirlRefresh.getBottom()
+                        -(prettyGirlView.getPaddingBottom()+layoutParams.bottomMargin))){
+                    page++;
+                    Log.e("页数",String.valueOf(page));
+                    getDatas("福利",COUNT, page);
+                    Log.e("底部刷新","prettyGirlView.getPaddingBottom()"+"+"+"layoutParams.bottomMargin");
+                }
+                Log.e("last",String.valueOf(last)+"+"+String.valueOf(resultList.size()-1)+"+"+String.valueOf(prettyGirlAdapter.getItemCount()));
+                Log.e("最后位置对比",String.valueOf(last==resultList.size()-1)+"+"+String.valueOf(prettyGirlRefresh
+                        .getBottom()
+                        -lastView.getBottom())+"+"+String
+                        .valueOf
+                        (layoutParams.bottomMargin)+"+"+String.valueOf(dy)+"+"+String.valueOf(page));
             }
         });
         return view;
     }
 
 
-    private void getDatas(String type, int count, int page) {
+    protected void getDatas(String type, int count, final int page) {
+        Log.e("getDatas",type);
         GankRetrofit.getRetrofit()
                 .create(GankService.class)
                 .getGank(type, count, page)//下面两行代码适用于多数的 后台线程取数据，主线程显示』的程序策略
-                .subscribeOn(Schedulers.newThread())//指定 subscribe() 发生在 IO 线程（创建的事件的内容 1、2、3、4 将会在 IO 线程发出Schedulers.io()    ）
+                .subscribeOn(Schedulers.io())//指定 subscribe() 发生在 IO 线程（创建的事件的内容 1、2、3、4 将会在 IO 线程发出Schedulers
+                // .io()    ）
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Gank>() {
                     @Override
                     public void onNext(Gank gank) {
-                        resultList=gank.getResults();
-                        for (Gank.Result result:resultList){
+                        //刷新后resultView数据清零
+                        prettyGirlRefresh.setRefreshing(true);
+                        if (page==DEFAULT_PAGE){
+                            prettyGirlAdapter.clear();
+                            //saveResult.clear();
+                        }
+                        Log.e("检查","true");
+                        resultList = gank.getResults();
+                        for (Gank.Result result : resultList) {
                             prettyGirlAdapter.addData(result);
                         }
 
-                        Log.e("111", Thread.currentThread().getName()+"onNext");
+
+                        Log.e("111", Thread.currentThread().getName() + "onNext");
                     }
 
                     @Override
                     public void onCompleted() {
-                        Log.e("222", Thread.currentThread().getName()+"onCompleted");
+                        Log.e("222", Thread.currentThread().getName() + "onCompleted");
+                        prettyGirlRefresh.setRefreshing(false);
                     }
 
                     @Override
@@ -124,8 +161,6 @@ public class PrettyGirlFragment extends Fragment {
                     }
 
                 });
+
     }
-
-
-
 }

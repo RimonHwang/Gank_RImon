@@ -5,6 +5,9 @@ import android.support.design.widget.TabLayout;
 import android.support.design.widget.TabLayout.Tab;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 
 import com.example.gankRimon.R;
 import com.example.gankRimon.adapter.PageAdapter;
@@ -20,11 +23,15 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.tabLayout)
     TabLayout tabLayout;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+
 
         initTabs();//初始化Tabs指示器
         adapter = new PageAdapter(getSupportFragmentManager(), tabLayout.getTabCount());
@@ -72,6 +79,31 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTabReselected(Tab tab) {
+
+                RecyclerView prettyGirlView= (RecyclerView) findViewById(R.id.prettyGirlView);
+                CardView cardView= (CardView) findViewById(R.id.cardView);
+                RecyclerView.LayoutParams layoutParams= (RecyclerView.LayoutParams) cardView.getLayoutParams();
+
+//                if (cardView != null) {
+//                    RecyclerView.LayoutParams layoutParams = (RecyclerView.LayoutParams) cardView.getLayoutParams();
+//                }
+
+                if (prettyGirlView != null) {
+                    prettyGirlView.scrollToPosition(0);//回到顶部
+                }
+
+                Log.e("padding",String.valueOf(prettyGirlView.getChildAt(0).getTop())+"+"+String.valueOf(layoutParams.topMargin+prettyGirlView.getPaddingTop()));
+
+                int firstChildPosition=prettyGirlView.getChildAdapterPosition(prettyGirlView.getChildAt(0));
+                Log.e("位置",String.valueOf(firstChildPosition));//当前显示的第一个cardView的位置。
+
+                if (firstChildPosition==0 && prettyGirlView.getChildAt(0).getTop()==prettyGirlView.getPaddingTop()
+                        +layoutParams.topMargin){
+                   //加入双击刷新功能
+                    PrettyGirlFragment prettyGirlFragment= (PrettyGirlFragment) adapter.instantiateItem(viewPager,0);
+                    prettyGirlFragment.getDatas("福利", 20, 1);
+                }
+
 
             }
         });

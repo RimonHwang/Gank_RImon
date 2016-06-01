@@ -14,16 +14,16 @@ public class GankRetrofit {
 
     public static Retrofit getRetrofit(){
         if (retrofit == null){
-//            synchronized (GankRetrofit.class){
-//                if (retrofit == null){
+            synchronized (GankRetrofit.class){
+                if (retrofit == null){
                     retrofit = new Retrofit.Builder()
                             .baseUrl(Gank_Url)
                             .addConverterFactory(GsonConverterFactory.create())
                             .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                             .build();
                 }
-//            }
-//        }
+            }
+       }
         return retrofit;
     }
 }
