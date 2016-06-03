@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.gankRimon.R;
-import com.example.gankRimon.model.Gank;
+import com.example.gankRimon.model.Result;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ import java.util.List;
 public class PrettyGirlAdapter extends RecyclerView.Adapter<PrettyGirlViewHolder> {
 
     private Context context;
-    private final List<Gank.Result> resultList=new ArrayList<>();
+    private final List<Result> resultList=new ArrayList<>();
     private OnItemClickListener onClickListener;
     private OnItemLongClickListener onLongClickListener;
 
@@ -42,7 +42,8 @@ public class PrettyGirlAdapter extends RecyclerView.Adapter<PrettyGirlViewHolder
         this.onLongClickListener = onLongClickListener;
     }
 
-    public void addData(Gank.Result result) {
+    public void addData(Result result) {
+
         resultList.add(result);
         notifyDataSetChanged();
     }
@@ -52,6 +53,9 @@ public class PrettyGirlAdapter extends RecyclerView.Adapter<PrettyGirlViewHolder
         notifyDataSetChanged();
     }
 
+    public List<Result> getResultList(){
+        return resultList;
+    }
 
     @Override
     public PrettyGirlViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -63,7 +67,7 @@ public class PrettyGirlAdapter extends RecyclerView.Adapter<PrettyGirlViewHolder
     @Override
     public void onBindViewHolder(PrettyGirlViewHolder holder, int position) {
         holder.setPositions(position);
-        final Gank.Result result=resultList.get(position);
+        final Result result=resultList.get(position);
         ImageView imageView =holder.imageView;
         holder.textView.setText(result.getDesc());
         Glide.with(context)
@@ -88,8 +92,6 @@ public class PrettyGirlAdapter extends RecyclerView.Adapter<PrettyGirlViewHolder
         void onLongClick(View v);
     }
 
-    public List<Gank.Result> getResultList(){
-        return resultList;
-    }
+
 
 }

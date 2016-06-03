@@ -12,10 +12,10 @@ import com.example.gankRimon.view.PrettyGirlFragment;
  * Created by Rimon on 2016/5/27.
  */
 //新建PageAdapter类继承FragmentStatePagerAdapter,构造方法中传入代表Tab个数的参数numOfTabs；
-public class PageAdapter extends FragmentStatePagerAdapter {
+public class MyPageAdapter extends FragmentStatePagerAdapter {
     int numOfTabs;
 
-    public PageAdapter(FragmentManager fm, int numOfTabs) {
+    public MyPageAdapter(FragmentManager fm, int numOfTabs) {
         super(fm);
         this.numOfTabs = numOfTabs;
     }

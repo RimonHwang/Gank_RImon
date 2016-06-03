@@ -2,13 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
               android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/no_network"
         android:orientation="vertical"
         android:visibility="gone"
-        android:gravity="center_horizontal"
+        android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -20,19 +21,13 @@
 
 
         <TextView
-            android:text="NO WIFI，不能愉快的看妹纸啦.. ( ＞ω＜)"
+            android:text="网络瘫痪了，点击重试……"
             android:layout_marginTop="15dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
     </LinearLayout>
-    <ImageView
-        android:id="@+id/testView"
-        android:src="@drawable/head"
-        android:visibility="gone"
-        android:layout_gravity="center"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/prettyGirlRefresh"
         android:layout_width="wrap_content"

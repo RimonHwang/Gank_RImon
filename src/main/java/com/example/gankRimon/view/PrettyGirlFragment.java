@@ -2,6 +2,7 @@ package com.example.gankRimon.view;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -13,15 +14,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.example.gankRimon.R;
 import com.example.gankRimon.adapter.PrettyGirlAdapter;
 import com.example.gankRimon.model.Gank;
+import com.example.gankRimon.model.Result;
 import com.example.gankRimon.retrofit.GankRetrofit;
 import com.example.gankRimon.retrofit.GankService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -36,25 +38,16 @@ import rx.schedulers.Schedulers;
 public class PrettyGirlFragment extends Fragment {
     @BindView(R.id.no_network)
     LinearLayout noNetwork;
-    @BindView(R.id.testView)
-    ImageView imageView;
     @BindView(R.id.prettyGirlView)
     RecyclerView prettyGirlView;
     @BindView(R.id.prettyGirlRefresh)
     SwipeRefreshLayout prettyGirlRefresh;
 
-    PrettyGirlAdapter prettyGirlAdapter;
-
-
-    private Gank.Result result;
-    private List<Gank.Result> resultList;
-    private List<Gank.Result> saveResult;
+    private PrettyGirlAdapter prettyGirlAdapter;
+    private List<Result> resultList;
     int COUNT=20;
-    public int DEFAULT_PAGE=1;
-    public int page=DEFAULT_PAGE;
-
-
-
+    private int DEFAULT_PAGE=1;
+    private int page=DEFAULT_PAGE;
 
     @Nullable
     @Override
@@ -71,11 +64,16 @@ public class PrettyGirlFragment extends Fragment {
 
         prettyGirlAdapter = new PrettyGirlAdapter(getActivity(), new PrettyGirlAdapter.OnItemClickListener() {
             @Override
-            public void onClick(View v, int position) {
+            public void onClick(View v,  int position) {
+                //TODO:接受来自PrettyGirlAdapter的resultList。
+                resultList=prettyGirlAdapter.getResultList();
+                Log.e("result是否空",String.valueOf(resultList==null));
                 Intent intent = new Intent(getActivity(), PrettyGirlShow.class);
-                intent.putExtra("url", prettyGirlAdapter.getResultList().get(position).getUrl());
+                intent.putExtra("position", position);
+                intent.putParcelableArrayListExtra("resultList", (ArrayList<? extends Parcelable>) resultList);
                 startActivity(intent);
             }
+
         });
         prettyGirlView.setAdapter(prettyGirlAdapter);
         final StaggeredGridLayoutManager staggeredGridLayoutManager=new StaggeredGridLayoutManager(2,
@@ -135,11 +133,10 @@ public class PrettyGirlFragment extends Fragment {
                         prettyGirlRefresh.setRefreshing(true);
                         if (page==DEFAULT_PAGE){
                             prettyGirlAdapter.clear();
-                            //saveResult.clear();
                         }
                         Log.e("检查","true");
                         resultList = gank.getResults();
-                        for (Gank.Result result : resultList) {
+                        for (Result result : resultList) {
                             prettyGirlAdapter.addData(result);
                         }
 
@@ -156,8 +153,16 @@ public class PrettyGirlFragment extends Fragment {
                     @Override
                     public void onError(Throwable e) {
                         Log.e("333", "onError");
+                        prettyGirlRefresh.setVisibility(View.GONE);
                         noNetwork.setVisibility(View.VISIBLE);
                         Snackbar.make(prettyGirlView, "NO WIFI，不能愉快的看妹纸啦..", Snackbar.LENGTH_LONG).show();
+                        noNetwork.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                getDatas("福利", COUNT, DEFAULT_PAGE);
+                                noNetwork.setVisibility(View.GONE);
+                            }
+                        });
                     }
 
                 });
